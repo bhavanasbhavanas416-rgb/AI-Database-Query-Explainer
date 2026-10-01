@@ -1,0 +1,21 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables & secrets
+.env
+
+# Django staticfiles collected & media
+staticfiles/
+media/
+
+# Logs & temp files
+*.log
+.DS_Store
+Thumbs.db

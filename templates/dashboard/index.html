@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Database Query Explainer - Enterprise SQL Assistant</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Custom Modern Dashboard CSS -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <section class="auth-screen" id="auth-screen" aria-labelledby="auth-title">
+        <div class="auth-panel">
+            <div class="brand-icon"><i class="fa-solid fa-database"></i></div>
+            <p class="auth-eyebrow">AI DATABASE QUERY EXPLAINER</p>
+            <h1 id="auth-title">Welcome back</h1>
+            <p class="auth-description" id="auth-description">Sign in to continue to your database workspace.</p>
+            <form id="auth-form">
+                <label for="auth-username">Username</label>
+                <input class="form-control" id="auth-username" name="username" autocomplete="username" required>
+                <div id="auth-email-field" hidden>
+                    <label for="auth-email">Email address</label>
+                    <input class="form-control" id="auth-email" name="email" type="email" autocomplete="email">
+                </div>
+                <label for="auth-password">Password</label>
+                <input class="form-control" id="auth-password" name="password" type="password" autocomplete="current-password" required>
+                <p class="auth-error" id="auth-error" role="alert" hidden></p>
+                <button class="btn btn-info fw-bold w-100 mt-3" id="auth-submit" type="submit">Sign in</button>
+            </form>
+            <button class="auth-mode-toggle" id="auth-mode-toggle" type="button">New here? Create an account</button>
+        </div>
+    </section>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-brain-circuit"></i>
+                </div>
+                <div>
+                    <div class="brand-title">DB QUERY EXPLAINER</div>
+                    <span class="brand-badge">DJANGO + GROQ AI</span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu">
+                <div class="nav-section-title">Core Assistants</div>
+                <a class="nav-link-item active" data-pane="nav-dashboard">
+                    <i class="fa-solid fa-chart-line"></i> Overview
+                </a>
+                <a class="nav-link-item" data-pane="nav-generate-sql">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> NL to SQL AI
+                </a>
+                <a class="nav-link-item" data-pane="nav-explainer">
+                    <i class="fa-solid fa-code"></i> Query Explainer
+                </a>
+                <a class="nav-link-item" data-pane="nav-optimizer">
+                    <i class="fa-solid fa-gauge-high"></i> Optimization Engine
+                </a>
+
+                <div class="nav-section-title">Database & Tools</div>
+                <a class="nav-link-item" data-pane="nav-connections">
+                    <i class="fa-solid fa-network-wired"></i> DB Connections
+                </a>
+                <a class="nav-link-item" data-pane="nav-schema">
+                    <i class="fa-solid fa-sitemap"></i> Schema Explorer
+                </a>
+                <a class="nav-link-item" data-pane="nav-execution">
+                    <i class="fa-solid fa-terminal"></i> Query Runner
+                </a>
+                <a class="nav-link-item" data-pane="nav-analytics">
+                    <i class="fa-solid fa-chart-pie"></i> Analytics Dashboard
+                </a>
+
+                <div class="nav-section-title">Management</div>
+                <a class="nav-link-item" data-pane="nav-history">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Query History
+                </a>
+                <a class="nav-link-item" data-pane="nav-admin">
+                    <i class="fa-solid fa-user-shield"></i> Admin Panel
+                </a>
+                <a class="nav-link-item" data-pane="nav-settings">
+                    <i class="fa-solid fa-gear"></i> Settings & Profile
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; font-weight: 700;">
+                        AD
+                    </div>
+                    <div>
+                        <div class="fw-bold small" id="sidebar-user-name">User</div>
+                        <div class="text-muted extra-small" id="sidebar-user-role">Account</div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary ms-auto" id="logout-btn" type="button" title="Sign out"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Wrapper -->
+        <main class="main-wrapper">
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div class="page-title-box">
+                    <h4 id="top-title">Enterprise Dashboard</h4>
+                    <p class="mb-0 text-muted" id="top-subtitle">AI-Powered Database Query Assistant & Optimizer</p>
+                </div>
+
+                <div class="top-nav-actions">
+                    <div class="active-db-badge">
+                        <div class="pulse-dot"></div>
+                        <span id="active-db-badge-text">Enterprise Sample DB (100k+ Records)</span>
+                    </div>
+
+                    <button class="theme-toggle-btn" id="theme-toggle-btn" title="Toggle Light/Dark Theme">
+                        <i class="fa-solid fa-sun" id="theme-icon"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Body Pane Container -->
+            <div class="content-body">
+
+                <!-- 1. DASHBOARD OVERVIEW PANE -->
+                <div class="tab-pane-view active-pane" id="nav-dashboard">
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div>
+                                <div class="kpi-title">Connected Database</div>
+                                <div class="kpi-value text-info">128,000+</div>
+                                <span class="badge bg-success mt-1">100k+ Records Active</span>
+                            </div>
+                            <div class="kpi-icon"><i class="fa-solid fa-database"></i></div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div>
+                                <div class="kpi-title">Query Executions</div>
+                                <div class="kpi-value text-purple" id="dash-total-queries">0</div>
+                                <span class="badge bg-primary mt-1">Real-time Logs</span>
+                            </div>
+                            <div class="kpi-icon text-purple"><i class="fa-solid fa-bolt"></i></div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div>
+                                <div class="kpi-title">Avg Execution Speed</div>
+                                <div class="kpi-value text-green" id="dash-avg-speed">1.4 ms</div>
+                                <span class="badge bg-success mt-1">Sub-second Querying</span>
+                            </div>
+                            <div class="kpi-icon text-green"><i class="fa-solid fa-stopwatch"></i></div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div>
+                                <div class="kpi-title">System Health</div>
+                                <div class="kpi-value text-amber">100%</div>
+                                <span class="badge bg-warning text-dark mt-1">Groq Llama 3.3 70B</span>
+                            </div>
+                            <div class="kpi-icon text-amber"><i class="fa-solid fa-heart-pulse"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card-glass">
+                                <div class="card-header-flex">
+                                    <div class="card-title-lg"><i class="fa-solid fa-wand-magic-sparkles"></i> Quick NL to SQL Generator</div>
+                                </div>
+                                <p class="text-muted small">Type any natural language request to query your 100,000+ record database instantly:</p>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-bg-dark form-control text-white border-secondary" placeholder="e.g. Show top 10 customers by sales and order count" id="quick-prompt-input">
+                                    <button class="btn btn-info px-4 fw-bold" onclick="document.getElementById('nl-prompt-input').value = document.getElementById('quick-prompt-input').value; switchTab('nav-generate-sql'); document.getElementById('nl-sql-form').dispatchEvent(new Event('submit'));">
+                                        Generate SQL &rarr;
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card-glass">
+                                <div class="card-title-lg mb-3"><i class="fa-solid fa-shield-halved"></i> Security Guardrails</div>
+                                <ul class="list-unstyled small text-muted mb-0">
+                                    <li class="mb-2"><i class="fa-solid fa-check-circle text-success me-2"></i> Schema-Aware Prompting (0 Data Leakage)</li>
+                                    <li class="mb-2"><i class="fa-solid fa-check-circle text-success me-2"></i> SQL Injection Read-Only Guard</li>
+                                    <li class="mb-2"><i class="fa-solid fa-check-circle text-success me-2"></i> Indexed Execution for 100,000+ Rows</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. NATURAL LANGUAGE TO SQL PANE -->
+                <div class="tab-pane-view" id="nav-generate-sql">
+                    <div class="card-glass">
+                        <div class="card-title-lg mb-3"><i class="fa-solid fa-wand-magic-sparkles"></i> Natural Language to SQL Assistant</div>
+                        <form id="nl-sql-form">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">User Natural Language Request</label>
+                                <textarea class="form-control bg-dark text-white border-secondary" id="nl-prompt-input" rows="3" placeholder="e.g. Count employees in each department with average salary greater than 50,000"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-cyan text-dark fw-bold px-4" id="generate-sql-btn">
+                                <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Generate SQL Query
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card-glass" id="nl-sql-result-card" style="display: none;">
+                        <div class="card-header-flex">
+                            <div class="card-title-lg"><i class="fa-solid fa-code text-cyan"></i> Generated SQL Query</div>
+                            <button class="btn btn-sm btn-success fw-bold" onclick="runCurrentGeneratedSQL()">
+                                <i class="fa-solid fa-play me-1"></i> Execute Query
+                            </button>
+                        </div>
+                        
+                        <div class="sql-editor-container">
+                            <div class="sql-editor-header">
+                                <span><i class="fa-solid fa-terminal me-1"></i> Groq Llama 3.3 70B SQL Output</span>
+                                <span class="badge bg-secondary">ANSI SQL Standard</span>
+                            </div>
+                            <pre class="sql-code-box"><code id="generated-sql-display">-- Generated SQL will appear here...</code></pre>
+                        </div>
+
+                        <hr class="border-secondary my-4">
+
+                        <div class="row">
+                            <div class="col-lg-7">
+                                <div id="nl-explanation-container"></div>
+                            </div>
+                            <div class="col-lg-5">
+                                <div id="nl-optimization-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. SQL QUERY EXPLAINER PANE -->
+                <div class="tab-pane-view" id="nav-explainer">
+                    <div class="card-glass">
+                        <div class="card-title-lg mb-3"><i class="fa-solid fa-code"></i> Direct SQL Query Explainer</div>
+                        <form id="explain-sql-form">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Paste Raw SQL Query to Explain</label>
+                                <textarea class="sql-textarea" id="explain-sql-input" placeholder="SELECT department, COUNT(*) FROM employees GROUP BY department;"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-info fw-bold px-4">
+                                <i class="fa-solid fa-list-check me-2"></i> Explain Line-by-Line
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card-glass" id="explain-result-card" style="display: none;">
+                        <div id="direct-explain-container"></div>
+                    </div>
+                </div>
+
+                <!-- 4. QUERY OPTIMIZATION CENTER PANE -->
+                <div class="tab-pane-view" id="nav-optimizer">
+                    <div class="card-glass">
+                        <div class="card-title-lg mb-3"><i class="fa-solid fa-gauge-high"></i> Query Optimization Engine</div>
+                        <form id="optimize-sql-form">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Paste SQL Query for Performance Audit</label>
+                                <textarea class="sql-textarea" id="optimize-sql-input" placeholder="SELECT * FROM orders WHERE customer_id = 150;"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-amber text-dark fw-bold px-4" style="background: var(--accent-amber);">
+                                <i class="fa-solid fa-chart-simple me-2"></i> Audit Query Performance
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card-glass" id="optimize-result-card" style="display: none;">
+                        <div id="direct-optimize-container"></div>
+                    </div>
+                </div>
+
+                <!-- 5. DATABASE CONNECTIONS PANE -->
+                <div class="tab-pane-view" id="nav-connections">
+                    <div class="card-glass">
+                        <div class="card-title-lg mb-3"><i class="fa-solid fa-file-arrow-up"></i> Upload a SQLite Database</div>
+                        <form id="sqlite-upload-form" enctype="multipart/form-data">
+                            <div class="row align-items-end g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small fw-bold" for="sqlite-connection-name">Connection name</label>
+                                    <input class="form-control bg-dark text-white border-secondary" id="sqlite-connection-name" name="name" maxlength="100" placeholder="e.g. Sales analytics" required>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label text-muted small fw-bold" for="sqlite-file-input">SQLite file</label>
+                                    <input class="form-control bg-dark text-white border-secondary" id="sqlite-file-input" name="sqlite_file" type="file" accept=".db,.sqlite,.sqlite3,application/vnd.sqlite3" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-info fw-bold w-100" id="sqlite-upload-btn" type="submit"><i class="fa-solid fa-upload me-2"></i>Upload & Connect</button>
+                                </div>
+                            </div>
+                            <div class="form-text text-muted mt-2">SQLite database files up to 100 MB are supported.</div>
+                        </form>
+                    </div>
+                    <div class="card-glass">
+                        <div class="card-header-flex">
+                            <div class="card-title-lg"><i class="fa-solid fa-network-wired"></i> Managed Database Connections</div>
+                        </div>
+                        <div id="connections-list-container"></div>
+                    </div>
+                </div>
+
+                <!-- 6. SCHEMA EXPLORER PANE -->
+                <div class="tab-pane-view" id="nav-schema">
+                    <div class="card-glass mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h5 class="text-white fw-bold mb-1"><i class="fa-solid fa-sitemap text-cyan me-2"></i>Database Schema Inspector</h5>
+                                <p class="text-muted small mb-0">Total Tables: <span id="schema-total-tables" class="text-cyan fw-bold">0</span> | Total Records: <span id="schema-total-records" class="text-green fw-bold">0</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control bg-dark text-white border-secondary" id="schema-search-input" placeholder="Search tables or columns...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-glass mb-4">
+                        <h6 class="text-cyan fw-bold mb-2"><i class="fa-solid fa-link me-2"></i>Entity Relationships (Foreign Keys)</h6>
+                        <div id="er-relationships-list"></div>
+                    </div>
+
+                    <div class="row" id="schema-tables-container"></div>
+                </div>
+
+                <!-- 7. QUERY EXECUTION CONSOLE PANE -->
+                <div class="tab-pane-view" id="nav-execution">
+                    <div class="card-glass">
+                        <div class="card-title-lg mb-3"><i class="fa-solid fa-terminal"></i> SQL Query Execution Console</div>
+                        <form id="sql-runner-form">
+                            <div class="mb-3">
+                                <textarea class="sql-textarea" id="sql-runner-textarea" placeholder="SELECT * FROM customers LIMIT 20;"></textarea>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <button type="submit" class="btn btn-success fw-bold px-4" id="execute-sql-btn">
+                                    <i class="fa-solid fa-play me-2"></i> Execute Query
+                                </button>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-info btn-sm" id="export-csv-btn">
+                                        <i class="fa-solid fa-file-csv me-1"></i> Export CSV
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" id="export-excel-btn">
+                                        <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-glass" id="execution-result-card" style="display: none;">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="badge bg-dark border border-secondary text-info p-2">
+                                Total Records: <span id="exec-row-count">0</span> | Execution Time: <span id="exec-time-ms">0 ms</span>
+                            </span>
+                        </div>
+
+                        <div class="data-table-wrapper">
+                            <table class="custom-table">
+                                <thead id="data-table-head"></thead>
+                                <tbody id="data-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. DATABASE ANALYTICS DASHBOARD PANE -->
+                <div class="tab-pane-view" id="nav-analytics">
+                    <div class="card-glass mb-4">
+                        <div class="card-title-lg mb-2"><i class="fa-solid fa-chart-pie"></i> Database Analytics Dashboard</div>
+                        <p class="text-muted small" id="analytics-insights-text">Loading insights...</p>
+                    </div>
+
+                    <div class="card-glass">
+                        <canvas id="analyticsCanvas" style="max-height: 400px;"></canvas>
+                    </div>
+                </div>
+
+                <!-- 9. QUERY HISTORY PANE -->
+                <div class="tab-pane-view" id="nav-history">
+                    <div class="card-glass">
+                        <div class="card-header-flex">
+                            <div class="card-title-lg"><i class="fa-solid fa-clock-rotate-left"></i> Query Audit History Log</div>
+                            <button class="btn btn-outline-danger btn-sm" onclick="fetch('/api/v1/query/history/clear/', {method:'POST'}).then(() => loadHistoryList());">
+                                Clear Audit Logs
+                            </button>
+                        </div>
+                        <div class="data-table-wrapper">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>User Question</th>
+                                        <th>Generated SQL</th>
+                                        <th>Duration</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 10. ADMIN PANEL PANE -->
+                <div class="tab-pane-view" id="nav-admin">
+                    <div class="card-glass mb-4">
+                        <div class="card-title-lg mb-3"><i class="fa-solid fa-user-shield"></i> Administration & System Monitoring</div>
+                        <div class="data-table-wrapper">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>User</th>
+                                        <th>Prompt / Activity</th>
+                                        <th>Target SQL</th>
+                                        <th>Execution Speed</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-recent-logs"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 11. SETTINGS & PROFILE PANE -->
+                <div class="tab-pane-view" id="nav-settings">
+                    <div class="card-glass col-lg-6">
+                        <div class="card-title-lg mb-3"><i class="fa-solid fa-gear"></i> Profile & API Key Settings</div>
+                        <form id="profile-settings-form">
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Groq API Key (Llama 3.3 70B Integration)</label>
+                                <input type="password" class="form-control bg-dark text-white border-secondary" id="groq-key-input" placeholder="gsk_...">
+                                <span class="form-text extra-small text-muted">Optional. If empty, system uses schema-aware rule engine.</span>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Email Address</label>
+                                <input type="email" class="form-control bg-dark text-white border-secondary" id="profile-email-input" value="admin@enterprise.com">
+                            </div>
+                            <button type="submit" class="btn btn-primary fw-bold">Save Settings</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- App JavaScript -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
